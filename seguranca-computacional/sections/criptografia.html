@@ -1,0 +1,125 @@
+<!-- ============================================================
+     sections/criptografia.html — Criptografia
+     ============================================================ -->
+
+<section class="section" id="criptografia">
+
+  <div class="section__header fade-up">
+    <span class="section__num label">02</span>
+    <h2>Criptografia</h2>
+  </div>
+
+  <div class="col-2 col-2--sticky">
+
+    <!-- Coluna esquerda: texto + cards de tipo -->
+    <div class="fade-up">
+
+      <p style="margin-bottom: 1.25rem;">
+        Do grego <strong style="color: var(--text); font-weight: 500;">kryptós</strong>
+        ("escondido") + <strong style="color: var(--text); font-weight: 500;">gráphein</strong>
+        ("escrever"), a criptografia torna informações ilegíveis para não autorizados.
+        Já utilizada por Júlio César na Roma antiga, hoje opera com algoritmos digitais
+        milhares de vezes mais rápidos e seguros.
+      </p>
+
+      <p style="margin-bottom: 1.25rem;">
+        A <strong style="color: var(--text); font-weight: 500;">assinatura digital</strong>
+        usa criptografia assimétrica: o emissor cifra o hash da mensagem com sua chave
+        privada. O receptor, com a chave pública, verifica autenticidade e integridade.
+      </p>
+
+      <p style="margin-bottom: 1.25rem;">
+        Funções hash como
+        <strong style="color: var(--text); font-weight: 500;">MD5</strong> (128 bits) e
+        <strong style="color: var(--text); font-weight: 500;">SHA-1</strong> (160 bits)
+        geram uma "impressão digital" de comprimento fixo — computacionalmente inviável
+        de reverter ao conteúdo original.
+      </p>
+
+      <div class="highlight-box">
+        <strong>4 funções essenciais:</strong>
+        Confidencialidade · Autenticação · Não repúdio · Integridade
+      </div>
+
+      <!-- Cards simétrica / assimétrica -->
+      <div class="crypto-grid">
+
+        <div class="crypto-card crypto-card--sym fade-up">
+          <h4 class="crypto-card__title">Chave Simétrica</h4>
+          <p>
+            Mesma chave para cifrar e decifrar. Problema central: compartilhá-la
+            com segurança. Exemplos: Cifra de César (substituição) e Bazeries
+            (transposição).
+          </p>
+          <span class="tag tag--warn">1 chave</span>
+        </div>
+
+        <div class="crypto-card crypto-card--asym fade-up">
+          <h4 class="crypto-card__title">Chave Assimétrica</h4>
+          <p>
+            Par de chaves pública/privada. A pública cifra, a privada decifra.
+            Proposta por Diffie &amp; Hellman em 1976 — eliminou o problema de
+            distribuição de chaves.
+          </p>
+          <span class="tag tag--ok">2 chaves</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Coluna direita: diagrama de fluxo -->
+    <div class="fade-up">
+      <div class="flow-diagram">
+
+        <div class="flow-diagram__title">// Fluxo criptossistema assimétrico</div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">👩</div>
+          <div>
+            <span class="flow-step__label">Alice (remetente)</span>
+            <span class="flow-step__desc">Texto em claro x + chave pública de Bob</span>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">🔐</div>
+          <div>
+            <span class="flow-step__label">Algoritmo C (cifragem)</span>
+            <span class="flow-step__desc">Gera texto cifrado y</span>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">🌐</div>
+          <div>
+            <span class="flow-step__label">Canal inseguro (internet)</span>
+            <span class="flow-step__desc">Transmissão do texto cifrado y</span>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">🔓</div>
+          <div>
+            <span class="flow-step__label">Algoritmo C⁻¹ (decifragem)</span>
+            <span class="flow-step__desc">Chave privada de Bob aplicada</span>
+          </div>
+        </div>
+        <div class="flow-arrow">↓</div>
+
+        <div class="flow-step">
+          <div class="flow-step__icon">👨</div>
+          <div>
+            <span class="flow-step__label">Bob (destinatário)</span>
+            <span class="flow-step__desc">Recupera texto em claro x</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</section>

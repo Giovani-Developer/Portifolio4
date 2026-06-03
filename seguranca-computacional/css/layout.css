@@ -1,0 +1,130 @@
+/* ============================================================
+   layout.css — Nav · Hero · Sections · Footer · Grids
+   ============================================================ */
+
+nav, main, footer, section { position: relative; z-index: 1; }
+
+/* ── Nav ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 58px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 2.5rem;
+  background: rgba(7,7,13,.82);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav__logo {
+  font-family: var(--font-mono); font-size: .68rem;
+  color: var(--accent); letter-spacing: .22em; text-transform: uppercase;
+  display: flex; align-items: center; gap: .5rem;
+}
+.nav__logo::before {
+  content: ''; display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+  animation: blink 2.5s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+
+.nav__links { display: flex; gap: 2rem; }
+.nav__links a {
+  font-family: var(--font-mono); font-size: .62rem;
+  color: var(--text-muted); letter-spacing: .16em; text-transform: uppercase;
+  transition: color var(--transition);
+}
+.nav__links a:hover,
+.nav__links a.active { color: var(--accent); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 8rem 2.5rem 5rem;
+  max-width: 1160px; margin: 0 auto; position: relative;
+}
+
+.hero__eyebrow {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1.5rem; color: var(--accent);
+}
+.hero__eyebrow::before { content: ''; width: 36px; height: 1px; background: var(--accent); }
+
+.hero__title  { margin-bottom: 2rem; max-width: 780px; }
+.hero__title em { font-style: italic; color: var(--accent); }
+.hero__subtitle { max-width: 520px; margin-bottom: 2.5rem; font-size: 1rem; }
+
+.hero__stats { display: flex; gap: 3.5rem; }
+.hero__stat-num {
+  display: block; font-family: var(--font-mono);
+  font-size: 2.2rem; font-weight: 700; color: var(--accent); line-height: 1;
+}
+.hero__stat-label {
+  font-family: var(--font-mono); font-size: .7rem;
+  color: var(--text-muted); letter-spacing: .12em; text-transform: uppercase; margin-top: .25rem;
+}
+
+.hero__scroll {
+  position: absolute; bottom: 2.5rem; left: 2.5rem;
+  display: flex; align-items: center; gap: .5rem;
+  font-family: var(--font-mono); font-size: .58rem;
+  color: var(--text-faint); letter-spacing: .22em; text-transform: uppercase;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+.hero__scroll::before { content: ''; width: 1px; height: 36px; background: linear-gradient(to bottom, var(--accent), transparent); }
+@keyframes pulse { 0%,100%{opacity:.35} 50%{opacity:.9} }
+
+/* ── Section wrapper ── */
+.section {
+  padding: 6rem 2.5rem;
+  max-width: 1160px; margin: 0 auto;
+}
+
+.section--dark {
+  max-width: none;
+  background: var(--surface);
+  padding: 6rem 0;
+}
+.section--dark .section__inner {
+  max-width: 1160px; margin: 0 auto; padding: 0 2.5rem;
+}
+
+.section__header {
+  display: flex; align-items: baseline; gap: 1rem;
+  margin-bottom: 3rem;
+}
+.section__num {
+  font-family: var(--font-mono); font-size: .6rem;
+  color: var(--accent); opacity: .5; letter-spacing: .2em;
+}
+
+/* ── Layouts de 2 colunas ── */
+.col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+.col-2--wide { grid-template-columns: 1fr 2fr; }
+.col-2--sticky > :last-child { position: sticky; top: 80px; }
+
+/* ── Divisor ── */
+.divider { width: 100%; max-width: 1160px; height: 1px; margin: 0 auto; background: var(--border); }
+
+/* ── Footer ── */
+.footer {
+  position: relative; z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 2.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer__brand { font-family: var(--font-display); font-size: 1.1rem; color: var(--text-muted); }
+.footer__copy  { font-family: var(--font-mono); font-size: .58rem; color: var(--text-faint); letter-spacing: .15em; }
+
+/* ── Responsivo ── */
+@media (max-width: 768px) {
+  .nav__links { display: none; }
+  .hero, .section { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .section--dark .section__inner { padding: 0 1.25rem; }
+  .col-2, .col-2--wide { grid-template-columns: 1fr; }
+  .col-2--sticky > :last-child { position: static; }
+  .hero__stats { gap: 2rem; }
+  .hero__scroll { left: 1.25rem; }
+  .footer { flex-direction: column; gap: 1rem; text-align: center; }
+}

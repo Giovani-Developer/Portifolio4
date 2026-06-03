@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Segurança Computacional</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap"
+    rel="stylesheet" />
+
+  <!-- Stylesheets (ordem importa: base → layout → components) -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+
+<body>
+
+  <!-- Nav (conteúdo fixo, não precisa de fetch) -->
+  <nav class="nav" aria-label="Navegação principal">
+    <span class="nav__logo">// Seg. Computacional</span>
+    <ul class="nav__links">
+      <li><a href="#objetivos">Objetivos</a></li>
+      <li><a href="#criptografia">Criptografia</a></li>
+      <li><a href="#ataques">Ataques</a></li>
+      <li><a href="#defesa">Defesa</a></li>
+      <li><a href="#nuvens">Nuvens</a></li>
+    </ul>
+  </nav>
+
+  <!--
+    Mount points para cada seção.
+    O script abaixo carrega cada sections/*.html e injeta aqui.
+  -->
+  <main>
+    <div id="mount-hero"></div>
+    <div id="mount-objetivos"></div>
+    <div class="divider" role="separator"></div>
+    <div id="mount-criptografia"></div>
+    <div id="mount-ataques"></div>
+    <div id="mount-defesa"></div>
+    <div class="divider" role="separator"></div>
+    <div id="mount-nuvens"></div>
+  </main>
+
+  <footer class="footer" aria-label="Rodapé">
+    <span class="footer__brand">Segurança Computacional</span>
+    <span class="footer__copy label">Sistemas Operacionais — Material de estudo</span>
+  </footer>
+
+  <!--
+    Loader de seções:
+    Faz fetch de cada arquivo HTML parcial e injeta no mount point.
+    Após todas as seções carregadas, inicializa o main.js.
+  -->
+  <script>
+    const sections = [
+      { file: 'sections/hero.html', mount: 'mount-hero' },
+      { file: 'sections/objetivos.html', mount: 'mount-objetivos' },
+      { file: 'sections/criptografia.html', mount: 'mount-criptografia' },
+      { file: 'sections/ataques.html', mount: 'mount-ataques' },
+      { file: 'sections/defesa.html', mount: 'mount-defesa' },
+      { file: 'sections/nuvens.html', mount: 'mount-nuvens' },
+    ];
+
+    async function loadSections() {
+      await Promise.all(
+        sections.map(async ({ file, mount }) => {
+          try {
+            const res = await fetch(file);
+            if (!res.ok) throw new Error(`HTTP ${res.status} — ${file}`);
+            const html = await res.text();
+            document.getElementById(mount).innerHTML = html;
+          } catch (err) {
+            console.error('Falha ao carregar seção:', err);
+            document.getElementById(mount).innerHTML =
+              `<p style="color:red">Erro ao carregar ${file}</p>`;
+          }
+        })
+      );
+
+      const script = document.createElement('script');
+      script.src = 'js/main.js';
+      document.body.appendChild(script);
+    }
+
+    loadSections();
+  </script>
+
+</body>
+
+</html>

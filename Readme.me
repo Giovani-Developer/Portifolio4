@@ -1,0 +1,224 @@
+# Segurança Computacional — Site de Estudos
+
+Material de estudo interativo sobre Segurança em Sistemas Computacionais, desenvolvido como portfólio acadêmico para a disciplina de Sistemas Operacionais.
+
+---
+
+## Estrutura de Pastas
+
+```
+seguranca-computacional/
+├── index.html              # Ponto de entrada — monta a página dinamicamente
+├── css/
+│   ├── base.css            # Reset, variáveis CSS, tipografia global
+│   ├── layout.css          # Grid, seções, espaçamentos estruturais
+│   └── components.css      # Nav, cards, animações (.fade-up / .visible)
+├── js/
+│   └── main.js             # Scroll Reveal + Nav Scroll Spy (IntersectionObserver)
+└── sections/
+    ├── hero.html           # Seção de abertura com título e stats
+    ├── objetivos.html      # Os 4 pilares: Confidencialidade, Integridade, etc.
+    ├── criptografia.html   # Tipos e conceitos de criptografia
+    ├── ataques.html        # Vetores de ataque (DoS, DDoS, etc.)
+    ├── defesa.html         # Mecanismos de defesa
+    └── nuvens.html         # Segurança em ambientes de nuvem
+```
+
+---
+
+## Como Funciona
+
+### Por que os arquivos de seção são separados?
+
+Cada seção do site (`objetivos.html`, `criptografia.html`, etc.) é um **fragmento HTML parcial** — não tem `<html>`, `<head>` nem `<body>`. Isso segue o padrão de **componentização**: cada arquivo é responsável por apenas uma parte do conteúdo, facilitando manutenção e leitura.
+
+O `index.html` age como um **orquestrador**: define a estrutura base (nav, footer, mount points) e carrega os fragmentos dinamicamente em tempo de execução.
+
+---
+
+## index.html — O Orquestrador
+
+### Mount Points
+
+```html
+<main>
+  <div id="mount-hero"></div>
+  <div id="mount-objetivos"></div>
+  <div id="mount-criptografia"></div>
+  ...
+</main>
+```
+
+Cada `<div id="mount-*">` é um **ponto de injeção**. Eles começam vazios e são preenchidos pelo loader JavaScript com o conteúdo dos arquivos de seção.
+
+---
+
+### O Loader de Seções
+
+```javascript
+const sections = [
+  { file: 'sections/hero.html',        mount: 'mount-hero'        },
+  { file: 'sections/objetivos.html',   mount: 'mount-objetivos'   },
+  { file: 'sections/criptografia.html',mount: 'mount-criptografia'},
+  { file: 'sections/ataques.html',     mount: 'mount-ataques'     },
+  { file: 'sections/defesa.html',      mount: 'mount-defesa'      },
+  { file: 'sections/nuvens.html',      mount: 'mount-nuvens'      },
+];
+```
+
+Um array de objetos mapeia cada arquivo ao seu mount point correspondente.
+
+---
+
+#### `fetch()` — Por que usar?
+
+`fetch()` é a API nativa do browser para fazer **requisições HTTP**. Aqui ela é usada para buscar os arquivos HTML das seções do servidor local — da mesma forma que um browser busca qualquer recurso web.
+
+> ⚠️ Por isso o projeto **precisa de um servidor HTTP** (ex: Live Server do VS Code). Abrir o `index.html` diretamente pelo sistema de arquivos (`file://`) bloqueia o `fetch()` por política de segurança do browser (CORS).
+
+```javascript
+const res = await fetch(file);         // Faz a requisição HTTP para o arquivo
+if (!res.ok) throw new Error(...);     // Verifica se o servidor retornou sucesso (status 200–299)
+const html = await res.text();         // Lê o corpo da resposta como texto puro (HTML)
+document.getElementById(mount).innerHTML = html; // Injeta o HTML no mount point
+```
+
+---
+
+#### `async/await` — Por que usar?
+
+`fetch()` é uma operação **assíncrona**: o browser faz a requisição em background enquanto o restante do código continuaria executando. Sem controle, o `main.js` seria carregado antes das seções existirem no DOM — e o `IntersectionObserver` não encontraria nenhum elemento para observar.
+
+`async/await` resolve isso de forma legível:
+
+```javascript
+async function loadSections() {
+  await Promise.all(          // Aguarda TODAS as seções terminarem de carregar
+    sections.map(async ({ file, mount }) => {
+      const res  = await fetch(file);   // Pausa aqui até a resposta chegar
+      const html = await res.text();    // Pausa aqui até o texto ser lido
+      document.getElementById(mount).innerHTML = html;
+    })
+  );
+
+  // Só chega aqui depois que TODAS as seções estão no DOM
+  const script = document.createElement('script');
+  script.src = 'js/main.js';
+  document.body.appendChild(script);
+}
+```
+
+`Promise.all()` dispara todos os fetches **em paralelo** (não um por vez) e espera que todos terminem antes de prosseguir — o que é mais rápido do que carregar sequencialmente.
+
+---
+
+#### Tratamento de erros
+
+```javascript
+try {
+  const res = await fetch(file);
+  if (!res.ok) throw new Error(`HTTP ${res.status} — ${file}`);
+  // ...
+} catch (err) {
+  console.error('Falha ao carregar seção:', err);
+  document.getElementById(mount).innerHTML =
+    `<p style="color:red">Erro ao carregar ${file}</p>`;
+}
+```
+
+Se um arquivo não for encontrado (404) ou o servidor falhar, o erro é capturado e exibido visualmente no lugar da seção, sem quebrar o restante da página.
+
+---
+
+#### Por que o `main.js` é injetado via `createElement` e não com `<script src="">`?
+
+Se `<script src="js/main.js">` fosse colocado diretamente no `index.html`, ele executaria **antes** das seções serem carregadas — pois o carregamento das seções é assíncrono. Injetando o script programaticamente **após** o `Promise.all`, garantimos que o DOM já contém todos os elementos `.fade-up` quando o `IntersectionObserver` começar a observá-los.
+
+---
+
+## main.js — Interatividade
+
+O `main.js` **não usa `DOMContentLoaded`**. Como ele é injetado dinamicamente após todas as seções estarem no DOM, esse evento já disparou — envolver o código nele faria com que nunca executasse.
+
+### Scroll Reveal
+
+Faz elementos com a classe `.fade-up` aparecerem suavemente conforme o usuário rola a página.
+
+```javascript
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {           // Elemento entrou na área visível
+        entry.target.classList.add('visible'); // Ativa a animação CSS
+        observer.unobserve(entry.target);   // Para de observar (anima só uma vez)
+      }
+    });
+  },
+  { threshold: 0.1 }  // Dispara quando 10% do elemento estiver visível
+);
+
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+```
+
+O CSS em `components.css` define o comportamento visual:
+
+```css
+.fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+```
+
+Quando `.visible` é adicionada via JS, a transição CSS cuida da animação automaticamente.
+
+---
+
+### Nav Scroll Spy
+
+Destaca o link da navegação correspondente à seção que está na tela no momento.
+
+```javascript
+const navSections = document.querySelectorAll('section[id], div[id]');
+const navAnchors  = document.querySelectorAll('.nav__links a');
+
+const spyObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navAnchors.forEach(a => a.classList.remove('active')); // Remove destaque de todos
+        const active = document.querySelector(
+          `.nav__links a[href="#${entry.target.id}"]`          // Acha o link correspondente
+        );
+        if (active) active.classList.add('active');            // Destaca o link atual
+      }
+    });
+  },
+  { threshold: 0.4 }  // Dispara quando 40% da seção estiver visível
+);
+
+navSections.forEach(s => spyObserver.observe(s));
+```
+
+O `threshold: 0.4` evita trocas muito rápidas de seção ativa — só considera que a seção "entrou" quando 40% dela já está visível.
+
+---
+
+
+---
+
+## Tecnologias Utilizadas
+
+| Tecnologia | Uso |
+|---|---|
+| HTML5 semântico | Estrutura e fragmentos de seção |
+| CSS3 (variáveis, transições) | Estilização e animações |
+| JavaScript (ES2020+) | Loader assíncrono, Observers |
+| Fetch API | Carregamento dinâmico de seções |
+| IntersectionObserver API | Scroll Reveal e Nav Spy |
+| Live Server (VS Code) | Servidor HTTP local de desenvolvimento |
